@@ -7,6 +7,7 @@ import com.blog.repositories.UserRepository;
 import com.blog.services.UserServices;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +19,15 @@ public class UserServiceImpl implements UserServices {
     private UserRepository userRepository;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private ModelMapper modelMapper;
     @Override
     public UserDto createUser(UserDto userDto) {
 
         User user = this.dtoToUser(userDto);
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User savedUser = userRepository.save(user);
         return this.userToDto(savedUser);
 
@@ -34,7 +39,7 @@ public class UserServiceImpl implements UserServices {
 
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setAbout(userDto.getAbout());
 
         User updatedUser = userRepository.save(user);
@@ -63,12 +68,6 @@ public class UserServiceImpl implements UserServices {
     }
 
     User dtoToUser(UserDto userDto){
-
-        //        user.setUserId(userDto.getUserId());
-//        user.setName(userDto.getName());
-//        user.setAbout(userDto.getAbout());
-//        user.setEmail(userDto.getEmail());
-//        user.setPassword(userDto.getPassword());
         return modelMapper.map(userDto, User.class);
     }
 
